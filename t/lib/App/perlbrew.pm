@@ -3,6 +3,8 @@ package ## no pause
 use strict;
 use warnings;
 
+sub current_perl { return $ENV{PERLBREW_PERL} || 'perl-5.26.0'; }
+
 sub new { bless {}, $_[0]; }
 
 sub perlbrew_env {

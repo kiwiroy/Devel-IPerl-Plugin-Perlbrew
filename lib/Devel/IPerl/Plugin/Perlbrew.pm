@@ -43,7 +43,7 @@ sub register {
   my ($class, $iperl) = @_;
 
   for my $name (qw{perlbrew}) {
-    my $last = $class->new->name('@@@'); ## impossible name
+    my $current = $class->new->name('@@@'); ## impossible name
 
     $iperl->helper($name => sub {
       my ($ip, $lib, $ret) = (shift, shift, 0);
@@ -51,11 +51,11 @@ sub register {
       return $ret if 0 == PERLBREW_INSTALLED;
 
       my $new = $class->new->name($class->_make_name($lib));
-      if ($last->name ne $new->name) {
+      if ($current->name ne $new->name) {
         my $pb = PERLBREW_CLASS->new();
         $new->env({ $pb->perlbrew_env($new->name) });
-        $last = undef;
-        $last = $new->brew;
+        $current = undef;
+        $current = $new->brew;
       }
       return $new->success;
     });
@@ -98,7 +98,7 @@ sub spoil {
 sub success { scalar(keys %{$_[0]->{env}}) ? 1 : 0; }
 
 sub _filtered_env_keys {
-  return sort grep {  /^PERL/i && ! /^PERL5LIB$/ } keys %{+pop};
+  return (sort grep { m/^PERL/i && $_ ne "PERL5LIB" } keys %{+pop});
 }
 
 sub _from_binary_path {
@@ -110,7 +110,7 @@ sub _make_name {
   my ($class, $lib) = @_;
   my ($p, $l) = split /\@/, ($lib =~ /\@/ ? $lib : "\@$lib");
   $p = $ENV{PERLBREW_PERL} || _from_binary_path() || $p;
-  return join '@', $p, $l
+  return join '@', $p, $l;
 }
 
 sub DESTROY {

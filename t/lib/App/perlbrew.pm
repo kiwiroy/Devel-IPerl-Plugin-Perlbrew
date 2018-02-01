@@ -14,5 +14,13 @@ sub perlbrew_env {
     PERL5LIB => '/tmp/perl5'
   );
 }
+sub run_command {
+  my ($self, $cmd) = (shift, shift);
+  my $code = $self->can("run_command_$cmd");
+  $code->(@_) if $code;
+}
+sub run_command_list {
+  return 0;
+}
 
 1;

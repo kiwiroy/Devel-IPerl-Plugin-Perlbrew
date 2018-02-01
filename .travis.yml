@@ -9,10 +9,7 @@ perl:
 install:
   - ": echo 'Install jupyterhub' ;"
   - "git clone -b github-releases https://github.com/kiwiroy/p5-Alien-ZMQ.git alien-zmq"
-  - |
-    pushd alien-zmq
-    cpanm .
-    popd
+  - "pushd alien-zmq ; cpanm -n --quiet --installdeps . ; cpanm . ; popd"
   - "cpanm -n --quiet --installdeps --with-develop ."
 
 after_success:

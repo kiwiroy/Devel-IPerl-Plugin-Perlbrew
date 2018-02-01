@@ -7,6 +7,12 @@ perl:
   - "5.26"
 
 install:
+  - ": echo 'Install jupyterhub' ;"
+  - "git clone -b github-releases https://github.com/kiwiroy/p5-Alien-ZMQ.git alien-zmq"
+  - |
+    pushd alien-zmq
+    cpanm .
+    popd
   - "cpanm -n --quiet --installdeps --with-develop ."
 
 after_success:

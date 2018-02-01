@@ -4,17 +4,13 @@ use strict;
 use warnings;
 use feature 'say';
 
-use constant DEBUG => $ENV{IPERL_PLUGIN_PERLBREW_DEBUG}
-  ? 1
-  : 0;
+use constant DEBUG => $ENV{IPERL_PLUGIN_PERLBREW_DEBUG} ? 1 : 0;
 
 use constant PERLBREW_CLASS => $ENV{IPERL_PLUGIN_PERLBREW_CLASS}
   ? $ENV{IPERL_PLUGIN_PERLBREW_CLASS}
   : 'App::perlbrew';
 
-use constant PERLBREW_INSTALLED => eval 'use '. PERLBREW_CLASS.'; 1'
-  ? 1
-  : 0;
+use constant PERLBREW_INSTALLED => eval 'use '. PERLBREW_CLASS.'; 1' ? 1 : 0;
 
 our $VERSION = '0.01';
 
@@ -65,13 +61,12 @@ sub register {
     });
   }
 
-  for my $name (qw{perlbrew_list}) {
-
-    $iperl->helper($name => sub {
+  for my $name (qw{list list_modules}) {
+    $iperl->helper("perlbrew_$name" => sub {
       my ($ip, $ret) = (shift, 0);
       return $ret if 0 == PERLBREW_INSTALLED;
       my $pb = PERLBREW_CLASS->new();
-      return $pb->run_command('list');
+      return $pb->run_command($name);
     });
   }
   return 1;
@@ -141,6 +136,7 @@ Sometime analysis requires ...
 
   IPerl->load_plugin('Perlbrew') unless IPerl->can('perlbrew');
   IPerl->perlbrew_list();
+  IPerl->perlbrew_list_modules();
 
   IPerl->perlbrew('perl-5.26.0@reproducible');
 
@@ -161,6 +157,13 @@ Called by C<<< IPerl->load_plugin('Perlbrew') >>>.
   IPerl->perlbrew_list;
 
 This is identical to C<<< perlbrew list >>> and will output the same information.
+
+=head2 perlbrew_list_modules
+
+  IPerl->perlbrew_list_modules;
+
+This is identical to C<<< perlbrew list_modules >>> and will output the same
+information.
 
 =head1 ENVIRONMENT VARIABLES
 

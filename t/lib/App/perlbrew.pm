@@ -19,8 +19,13 @@ sub run_command {
   my $code = $self->can("run_command_$cmd");
   $code->(@_) if $code;
 }
+
 sub run_command_list {
   return 0;
+}
+
+sub run_command_list_modules {
+  return 1;
 }
 
 1;

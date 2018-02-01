@@ -12,6 +12,8 @@ my $iperl = new_ok('IPerl');
 
 ok $iperl->load_plugin('Perlbrew');
 
+can_ok $iperl, qw{perlbrew perlbrew_list perlbrew_list_modules};
+
 is $iperl->perlbrew(), 0, 'no library for app::perlbrew';
 
 my $save = $ENV{PERLBREW_ROOT};
@@ -68,5 +70,7 @@ is $ENV{TEST_THIS}, undef, 'not set';
 }
 
 is $iperl->perlbrew_list, 0, 'list';
+
+is $iperl->perlbrew_list_modules, 1, 'list_modules';
 
 done_testing;

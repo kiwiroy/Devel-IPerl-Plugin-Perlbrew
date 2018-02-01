@@ -15,4 +15,6 @@ on develop => sub {
   requires 'Test::CPAN::Changes';
   requires "Test::Pod::Coverage";
   requires "Test::Pod";
+  requires "Markdent" => "== 0.26";
+  requires "Markdown::Pod" => "== 0.006";
 };

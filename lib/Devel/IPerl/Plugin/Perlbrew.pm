@@ -123,6 +123,22 @@ sub DESTROY {
 
 Devel::IPerl::Plugin::Perlbrew - interact with perlbrew in Jupyter IPerl kernel
 
+=begin html
+
+<!--- Travis --->
+<a href="https://travis-ci.org/kiwiroy/Devel-IPerl-Plugin-Perlbrew">
+  <img src="https://travis-ci.org/kiwiroy/Devel-IPerl-Plugin-Perlbrew.svg?branch=master"
+       alt="Build Status" />
+</a>
+
+<!-- Kritika -->
+<a href="https://kritika.io/users/kiwiroy/repos/6870682787977901/heads/master/">
+  <img src="https://kritika.io/users/kiwiroy/repos/6870682787977901/heads/master/status.svg"
+       alt="Kritika Analysis Status"/>
+</a>
+
+=end html
+
 =head1 DESCRIPTION
 
 Sometime analysis requires ...

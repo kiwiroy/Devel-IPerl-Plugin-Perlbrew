@@ -160,6 +160,21 @@ Sometime analysis requires ...
 
   IPerl->perlbrew('perl-5.26.0@reproducible');
 
+=head1 INSTALLATION AND REQUISITES
+
+  ## install dependencies
+  cpanm --installdeps --quiet .
+  ## install
+  cpanm .
+
+If there are some issues with L<Devel::IPerl> installing refer to their
+L<README.md|https://github.com/EntropyOrg/p5-Devel-IPerl>. The C<.travis.yml> in
+this repository might provide sources of help.
+
+L<App::perlbrew> is a requirement and it is B<suggested> that L<Devel::IPerl> is
+deployed into a L<perlbrew> installed L<perl|perlbrew#COMMAND:-INSTALL> and use
+the L</"perlbrew"> to switch L<library|perlbrew#COMMAND:-LIB>.
+
 =head1 IPerl Interface Method
 
 =head2 register

@@ -18,7 +18,7 @@ sub brew {
   my $self = shift;
   my %env  = %{$self->env || {}};
   my %save = ();
-  for my $var(sort grep { /^PERL/i and ! /^PERL5LIB$/ } keys %env) {
+  for my $var(_filtered_env_keys(\%env)) {
     say STDERR join " = ", $var, $env{$var} if DEBUG;
     $save{$var} = $ENV{$var} if exists $ENV{$var};
     $ENV{$var} = $env{$var};
@@ -78,7 +78,7 @@ sub spoil {
   my $self = shift;
   my %env  = %{$self->env || {}};
   my %save = %{$self->saved || {}};
-  for my $var(sort grep { /^PERL/i and ! /^PERL5LIB$/ } keys %env) {
+  for my $var(_filtered_env_keys(\%env)) {
     if (exists $save{$var}) {
       say STDERR "revert ", join " = ", $var, $save{$var} if DEBUG;
       $ENV{$var} = $save{$var};
@@ -96,6 +96,10 @@ sub spoil {
 }
 
 sub success { scalar(keys %{$_[0]->{env}}) ? 1 : 0; }
+
+sub _filtered_env_keys {
+  return sort grep {  /^PERL/i && ! /^PERL5LIB$/ } keys %{+pop};
+}
 
 sub _from_binary_path {
   say STDERR $^X if DEBUG;

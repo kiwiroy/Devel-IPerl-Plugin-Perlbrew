@@ -103,13 +103,16 @@ sub _filtered_env_keys {
 
 sub _from_binary_path {
   say STDERR $^X if DEBUG;
-  if ($^X =~ m{\/(perl-5\.\d\d\.\d)\/}) { return $1; }
+  if ($^X =~ m{\/(perl-5\.\d\d\.\d)\/})  { return $1; }
+  if ($^X =~ m{/perls/([^/]+)/bin/perl}) { return $1; }
+  (my $v = $^V->normal) =~ s/v/perl-/;
+  return $v;
 }
 
 sub _make_name {
   my ($class, $lib) = @_;
   my ($p, $l) = split /\@/, ($lib =~ /\@/ ? $lib : "\@$lib");
-  $p = $ENV{PERLBREW_PERL} || _from_binary_path() || $p;
+  $p = $ENV{PERLBREW_PERL} || _from_binary_path();
   return join '@', $p, $l;
 }
 

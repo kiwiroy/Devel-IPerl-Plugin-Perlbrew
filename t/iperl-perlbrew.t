@@ -18,7 +18,8 @@ is $iperl->perlbrew(), 0, 'no library for app::perlbrew';
 
 my $save = $ENV{PERLBREW_ROOT};
 
-is $iperl->perlbrew('random'), 1, 'here';
+is $iperl->perlbrew('random1'), 1, 'here';
+is $iperl->perlbrew('random2'), 1, 'here';
 
 is $ENV{PERLBREW_ROOT}, $save, 'no change';
 is $ENV{PERLBREW_HOME}, '/tmp', 'set';
@@ -29,6 +30,7 @@ TODO: {
 }
 
 my $plugin = new_ok('Devel::IPerl::Plugin::Perlbrew');
+is $plugin->name, undef, 'empty default';
 is $plugin->name('perl-5.26.0@random'), $plugin, 'chaining';
 is $plugin->name, 'perl-5.26.0@random', 'set';
 
@@ -67,6 +69,24 @@ is $ENV{TEST_THIS}, undef, 'not set';
   undef $plugin; # this should also call spoil.
   is $ENV{PERLBREW_TEST_VAR}, undef, 'not set';
   is $ENV{PERLBREW_TEST_MODE}, 'production', 'mode reverted';
+}
+
+$plugin = new_ok('Devel::IPerl::Plugin::Perlbrew', [name => 'foobar']);
+$plugin->new(name => 'foo')->new({name => 'bar'})->brew;
+
+is $plugin->_make_name('foo'), 'perl-5.26.0@foo', 'make name';
+is $plugin->_make_name('foo'), 'perl-5.26.0@foo', 'make name';
+{
+  local $ENV{PERLBREW_PERL} = 'perl-5.24.3';
+  is $plugin->_make_name('bar'), 'perl-5.24.3@bar', 'make name';
+  is $plugin->_make_name('perl-5.26.1@bar'), 'perl-5.24.3@bar', 'make name';
+  delete $ENV{PERLBREW_PERL};;
+  (local $^X = $^X) =~ s{perls/([^/]+)/bin}{perls/perl-alias/bin};
+  is $plugin->_make_name('bar'), 'perl-alias@bar', 'make name';
+  is $plugin->_make_name('perl-5.26.1@bar'), 'perl-alias@bar', 'make name';
+  $^X =~ s{perls/([^/]+)/bin}{p/perl-alias/bin};
+  is $plugin->_make_name('bar'), 'perl-5.26.0@bar', 'make name';
+  is $plugin->_make_name('perl-5.26.1@bar'), 'perl-5.26.0@bar', 'make name';
 }
 
 is $iperl->perlbrew_list, 0, 'list';

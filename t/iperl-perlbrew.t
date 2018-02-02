@@ -70,17 +70,19 @@ is $ENV{TEST_THIS}, undef, 'not set';
   is $ENV{PERLBREW_TEST_VAR}, undef, 'not set';
   is $ENV{PERLBREW_TEST_MODE}, 'production', 'mode reverted';
 }
-
+# constructor tests
 $plugin = new_ok('Devel::IPerl::Plugin::Perlbrew', [name => 'foobar']);
 $plugin->new(name => 'foo')->new({name => 'bar'})->brew;
 
-is $plugin->_make_name('foo'), 'perl-5.26.0@foo', 'make name';
-is $plugin->_make_name('foo'), 'perl-5.26.0@foo', 'make name';
+# _make_name tests check various constraints
+(my $current_perl = $^X) =~ s{.*/perls/([^/]+)/bin/perl}{$1};
+is $plugin->_make_name('foo'), join('@', $ENV{PERLBREW_PERL}, 'foo'),
+  'make name';
 {
   local $ENV{PERLBREW_PERL} = 'perl-5.24.3';
   is $plugin->_make_name('bar'), 'perl-5.24.3@bar', 'make name';
   is $plugin->_make_name('perl-5.26.1@bar'), 'perl-5.24.3@bar', 'make name';
-  delete $ENV{PERLBREW_PERL};;
+  delete $ENV{PERLBREW_PERL};
   (local $^X = $^X) =~ s{perls/([^/]+)/bin}{perls/perl-alias/bin};
   is $plugin->_make_name('bar'), 'perl-alias@bar', 'make name';
   is $plugin->_make_name('perl-5.26.1@bar'), 'perl-alias@bar', 'make name';

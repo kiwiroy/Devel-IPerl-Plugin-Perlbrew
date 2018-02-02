@@ -83,12 +83,16 @@ is $plugin->_make_name('foo'), join('@', $ENV{PERLBREW_PERL}, 'foo'),
   is $plugin->_make_name('bar'), 'perl-5.24.3@bar', 'make name';
   is $plugin->_make_name('perl-5.26.1@bar'), 'perl-5.24.3@bar', 'make name';
   delete $ENV{PERLBREW_PERL};
+  ## default to directory
   (local $^X = $^X) =~ s{perls/([^/]+)/bin}{perls/perl-alias/bin};
   is $plugin->_make_name('bar'), 'perl-alias@bar', 'make name';
   is $plugin->_make_name('perl-5.26.1@bar'), 'perl-alias@bar', 'make name';
+  ## default to perl version
   $^X =~ s{perls/([^/]+)/bin}{p/perl-alias/bin};
-  is $plugin->_make_name('bar'), 'perl-5.26.0@bar', 'make name';
-  is $plugin->_make_name('perl-5.26.1@bar'), 'perl-5.26.0@bar', 'make name';
+  (my $version =~ $^V->normal) =~ s{^v}{perl-};
+  is $plugin->_make_name('bar'), join('@', $version, 'bar'), 'make name';
+  is $plugin->_make_name('perl-5.26.1@bar'), join('@', $version, 'bar'),
+    'make name';
 }
 
 is $iperl->perlbrew_list, 0, 'list';

@@ -25,12 +25,13 @@ sub brew {
   }
   if ($env{PERL5LIB}) {
     say STDERR join " = ", 'PERL5LIB', $env{'PERL5LIB'} if DEBUG;
-    eval "use lib split ':', q[$env{PERL5LIB}];" ;
+    eval "use lib split ':', q[$env{PERL5LIB}];";
+    warn $@ if $@;
   }
   return $self->saved(\%save);
 }
 
-sub env  { return $_[0]{env}  if @_ == 1; $_[0]{env}  = $_[1]; $_[0]; }
+sub env { return $_[0]{env}  if @_ == 1; $_[0]{env}  = $_[1]; $_[0]; }
 
 sub new {
   my $class = shift;
@@ -103,7 +104,6 @@ sub _filtered_env_keys {
 
 sub _from_binary_path {
   say STDERR $^X if DEBUG;
-  if ($^X =~ m{\/(perl-5\.\d\d\.\d)\/})  { return $1; }
   if ($^X =~ m{/perls/([^/]+)/bin/perl}) { return $1; }
   (my $v = $^V->normal) =~ s/v/perl-/;
   return $v;
@@ -128,7 +128,7 @@ sub DESTROY {
 
 =head1 NAME
 
-Devel::IPerl::Plugin::Perlbrew - interact with perlbrew in Jupyter IPerl kernel
+Devel::IPerl::Plugin::Perlbrew - interact with L<perlbrew> in L<Jupyter|https://jupyter.org> IPerl kernel
 
 =begin html
 

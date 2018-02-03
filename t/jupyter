@@ -1,0 +1,10 @@
+## -*- mode: perl; -*-
+use strict;
+use warnings;
+use feature 'say';
+use FindBin;
+use Path::Class;
+
+my $dir = dir($FindBin::Bin)->subdir(qw{data});
+$dir->mkpath;
+say $dir;

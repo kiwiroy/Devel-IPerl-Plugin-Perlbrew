@@ -18,7 +18,8 @@ sub augment_kernel_spec {
   my $class       = shift;
   my $kernel_file = shift;
 	my $kernel_spec = decode_json( $kernel_file->slurp );
-  my $augmented   = (exists $kernel_spec->{env} ? 0 : 1);
+  my $augmented   =
+    (exists $kernel_spec->{env} && $kernel_spec->{env}{PERLBREW_ROOT} ? 0 : 1);
   $kernel_spec->{env} = {
     %{$kernel_spec->{env} || {}}
   };

@@ -1,8 +1,12 @@
 use strict;
 use warnings;
 use Test::More;
+use File::Temp qw{tempdir};
 use Path::Class qw{dir};
 use JSON::MaybeXS qw(decode_json);
+
+my $tmp =
+  tempdir('devel-iperl-plugin-perlbrew-XXXXX', TMPDIR => 1, CLEANUP => 1 );
 
 ## installer script
 require './scripts/perlbrewise-spec';
@@ -10,7 +14,7 @@ require './scripts/perlbrewise-spec';
   no warnings 'once';
   ## setting this subverts the writing to kernel.json in install location
   $Devel::IPerl::Plugin::Perlbrew::Install::JUPYTER =
-    join ' ', $^X, './t/jupyter';
+    join ' ', $^X, './t/jupyter', $tmp;
 }
 
 my $class = 'Devel::IPerl::Plugin::Perlbrew::Install';

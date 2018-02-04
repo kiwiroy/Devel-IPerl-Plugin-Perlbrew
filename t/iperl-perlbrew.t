@@ -14,7 +14,7 @@ ok $iperl->load_plugin('Perlbrew');
 
 can_ok $iperl, qw{perlbrew perlbrew_list perlbrew_list_modules};
 
-is $iperl->perlbrew(), 0, 'no library for app::perlbrew';
+is $iperl->perlbrew(), -1, 'no library for app::perlbrew';
 
 my $save = $ENV{PERLBREW_ROOT};
 
@@ -33,6 +33,10 @@ my $plugin = new_ok('Devel::IPerl::Plugin::Perlbrew');
 is $plugin->name, undef, 'empty default';
 is $plugin->name('perl-5.26.0@random'), $plugin, 'chaining';
 is $plugin->name, 'perl-5.26.0@random', 'set';
+is $plugin->unload, undef, 'empty';
+is $plugin->unload(1), $plugin, 'chaining';
+is $plugin->unload, 1, 'set';
+is $plugin->unload(0)->unload, 0, 'unset';
 
 my $env_set = {
   PERLBREW_TEST_VAR => 1,
@@ -61,6 +65,7 @@ is $ENV{TEST_THIS}, undef, 'not set';
 {
   diag "Brew 2" if $ENV{IPERL_PLUGIN_PERLBREW_DEBUG};
   local %ENV = %ENV;
+  $plugin->env($env_set);
   $ENV{PERLBREW_TEST_MODE} = 'production';
   $plugin->brew;
   is $ENV{PERLBREW_TEST_VAR}, 1, 'now set';

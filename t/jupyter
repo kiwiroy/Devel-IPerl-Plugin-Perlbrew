@@ -2,9 +2,14 @@
 use strict;
 use warnings;
 use feature 'say';
-use FindBin;
-use Path::Class;
+use Path::Class qw{dir};
 
-my $dir = dir($FindBin::Bin)->subdir(qw{data});
-$dir->mkpath;
-say $dir;
+sub main {
+  my ($class, $tmp) = (shift, shift || '.');
+  my $dir = dir($tmp)->subdir(qw{data});
+  $dir->mkpath;
+  say $dir;
+  return 0;
+}
+
+exit(__PACKAGE__->main(@ARGV)) unless caller();

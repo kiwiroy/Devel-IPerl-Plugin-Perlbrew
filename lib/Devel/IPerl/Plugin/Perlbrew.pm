@@ -3,7 +3,7 @@ package Devel::IPerl::Plugin::Perlbrew;
 use strict;
 use warnings;
 use feature 'say';
-
+use Symbol 'delete_package';
 use constant DEBUG => $ENV{IPERL_PLUGIN_PERLBREW_DEBUG} ? 1 : 0;
 
 use constant PERLBREW_CLASS => $ENV{IPERL_PLUGIN_PERLBREW_CLASS}
@@ -19,7 +19,7 @@ sub brew {
   my %env  = %{$self->env || {}};
   my %save = ();
   for my $var(_filtered_env_keys(\%env)) {
-    say STDERR join " = ", $var, $env{$var} if DEBUG;
+    say STDERR "@$self{name} ", join " = ", $var, $env{$var} if DEBUG;
     $save{$var} = $ENV{$var} if exists $ENV{$var};
     $ENV{$var} = $env{$var};
   }
@@ -47,15 +47,16 @@ sub register {
     my $current = $class->new->name('@@@'); ## impossible name
 
     $iperl->helper($name => sub {
-      my ($ip, $lib, $ret) = (shift, shift, 0);
+      my ($ip, $lib, $unload, $ret) = (shift, shift, shift || 0, -1);
       return $ret if not defined $lib;
       return $ret if 0 == PERLBREW_INSTALLED;
 
       my $new = $class->new->name($class->_make_name($lib));
-      if ($current->name ne $new->name) {
+      if ($current->unload($unload)->name ne $new->name) {
         my $pb = PERLBREW_CLASS->new();
         $new->env({ $pb->perlbrew_env($new->name) });
-        $current = undef;
+        ## ensure the timing of the DESTROY, spoil
+        undef($current = $current->spoil);
         $current = $new->brew;
       }
       return $new->success;
@@ -92,11 +93,27 @@ sub spoil {
     say STDERR join " = ", 'PERL5LIB', $env{'PERL5LIB'} if DEBUG;
     eval "no lib split ':', q[$env{PERL5LIB}];";
     warn $@ if $@;
+    if ($self->unload) {
+      my $path_re = qr{\Q$env{PERL5LIB}\E};
+      for my $module_path(keys %INC) {
+        next if not defined $INC{$module_path};
+        next if $INC{$module_path} !~ m{^$path_re};
+        (my $class = $module_path) =~ s{/}{::}g;
+        $class =~ s/\.pm//;
+        say "unloading $class ($module_path) from $INC{$module_path}";
+        _teardown($class);
+        delete $INC{$module_path};
+      }
+    }
   }
+  # no need to revert again.
+  $self->env({})->saved({});
   return $self;
 }
 
 sub success { scalar(keys %{$_[0]->{env}}) ? 1 : 0; }
+
+sub unload { return $_[0]{unload} if @_ == 1; $_[0]{unload} = $_[1]; $_[0]; }
 
 sub _filtered_env_keys {
   return (sort grep { m/^PERL/i && $_ ne "PERL5LIB" } keys %{+pop});
@@ -116,10 +133,20 @@ sub _make_name {
   return join '@', $p, $l;
 }
 
+## from Mojo::Util
+sub _teardown {
+  return unless my $class = shift;
+  # @ISA has to be cleared first because of circular references
+  no strict 'refs';
+  @{"${class}::ISA"} = ();
+  delete_package $class;
+}
+
 sub DESTROY {
   my $self = shift;
   say STDERR "DESTROY $self @$self{name}" if DEBUG;
   $self->spoil;
+  return ;
 }
 
 1;
@@ -189,6 +216,10 @@ Called by C<<< IPerl->load_plugin('Perlbrew') >>>.
 =head2 perlbrew
 
   IPerl->perlbrew('perl-5.26.0@reproducible');
+
+This is identical to C<<< perlbrew use perl-5.26.0@reproducible >>> and will
+switch any from any previous call. Returns C<1>, C<0> or C<-1> for I<success>,
+I<no change> and I<error> respectively.
 
 =head2 perlbrew_list
 
@@ -269,8 +300,18 @@ destruction.
 
 =head2 success
 
+  # boolean where 1 == success, 0 == not success
   $plugin->success;
 
 Was everything a success?
+
+=head2 unload
+
+  $plugin->unload(1);
+  # 1
+  $plugin->unload;
+
+A flag to determine whether to unload all the modules that were used as part of
+this library during cleanup.
 
 =cut

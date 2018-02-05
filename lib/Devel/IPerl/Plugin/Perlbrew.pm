@@ -181,11 +181,11 @@ Devel::IPerl::Plugin::Perlbrew - interact with L<perlbrew> in L<Jupyter|https://
 
 =head1 DESCRIPTION
 
-In a shared server environment the needs of multiple users can be met most
-easily with access to L<perlbrew> and the ability to install perl modules under
-their own libraries. A user can generate a L<cpanfile> to facilitate the creation
-of these libraries in a reproducible manner. At the command line a typical
-workflow in such an environment might appear thus:
+In a shared server environment the Perl module needs of multiple users can be
+met most easily with access to L<perlbrew> and the ability to install perl
+modules under their own libraries. A user can generate a L<cpanfile> to
+facilitate the creation of these libraries in a reproducible manner. At the
+command line a typical workflow in such an environment might appear thus:
 
   perlbrew lib create perl-5.26.0@reproducible
   perlbrew use perl-5.26.0@reproducible
@@ -219,8 +219,8 @@ L<README.md|https://github.com/EntropyOrg/p5-Devel-IPerl>. The C<.travis.yml> in
 this repository might provide sources of help.
 
 L<App::perlbrew> is a requirement and it is B<suggested> that L<Devel::IPerl> is
-deployed into a L<perlbrew> installed L<perl|perlbrew#COMMAND:-INSTALL> and use
-the L</"perlbrew"> to switch L<library|perlbrew#COMMAND:-LIB>.
+deployed into a L<perlbrew> installed L<perl|perlbrew#COMMAND:-INSTALL> and call
+the L</"perlbrew"> function to use each L<library|perlbrew#COMMAND:-LIB>.
 
 =head1 IPerl Interface Method
 

@@ -221,6 +221,26 @@ This is identical to C<<< perlbrew use perl-5.26.0@reproducible >>> and will
 switch any from any previous call. Returns C<1>, C<0> or C<-1> for I<success>,
 I<no change> and I<error> respectively.
 
+  IPerl->perlbrew('perl-5.26.0@tutorial', 1);
+
+The function takes a Boolean as an optional second argument. A I<true> value will
+result in all the modules that were loaded during the activity of the previous
+library to be unloaded using L<delete_package|Symbol>. The default value is
+I<false> as setting is to true might expose the L<unexpected|Symbol#BUGS>
+behaviour.
+
+When using multiple L<perlbrew> libraries it may be possible to use modules from
+both, although this is not a recommended use.
+
+  IPerl->perlbrew('perl-5.26.0@tutorial');
+  use Jupyter::Tutorial::Simple;
+  ## run some code
+
+  ## load @reproducible, but do not unload Jupyter::Tutorial::Simple
+  IPerl->perlbrew('perl-5.26.0@reproducible', 0);
+  use Bio::Taxonomy;
+  ## ... more code, possibly using Jupyter::Tutorial::Simple
+
 =head2 perlbrew_list
 
   IPerl->perlbrew_list;

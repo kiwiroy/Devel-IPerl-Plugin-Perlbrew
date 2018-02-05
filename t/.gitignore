@@ -1,0 +1,4 @@
+bin/
+man/
+lib/perl5/*
+!lib/perl5/ACME/

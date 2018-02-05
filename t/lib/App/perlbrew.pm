@@ -15,7 +15,10 @@ sub perlbrew_env {
   return (
     PERLBREW_ROOT => $ENV{PERLBREW_ROOT},
     PERLBREW_HOME => '/tmp',
-    PERL5LIB => $PERL5LIB
+#    PERL_LOCAL_LIB_ROOT => $FindBin::Bin,
+#    PERL_MM_OPT => "INSTALL_BASE=$FindBin::Bin",
+#    PERL_MB_OPT => "--install_base $FindBin::Bin",
+    PERL5LIB => $PERL5LIB,
   );
 }
 sub run_command {

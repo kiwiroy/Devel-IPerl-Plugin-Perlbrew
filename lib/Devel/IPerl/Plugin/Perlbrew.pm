@@ -96,19 +96,26 @@ sub spoil {
     if ($self->unload) {
       my $path_re = qr{\Q$env{PERL5LIB}\E};
       for my $module_path(keys %INC) {
+        ## autosplit modules
+        next if $module_path =~ m{\.(al|ix)$} && delete $INC{$module_path};
+        ## global destruction ?
         next if not defined $INC{$module_path};
+        ## FatPacked ?
+        next if ref($INC{$module_path});
+        ## Not part of this PERL5LIB
         next if $INC{$module_path} !~ m{^$path_re};
+        ## translate to class_path
         (my $class = $module_path) =~ s{/}{::}g;
         $class =~ s/\.pm//;
+        ## notify and unload
         say "unloading $class ($module_path) from $INC{$module_path}";
-        _teardown($class);
+        _teardown( $class );
         delete $INC{$module_path};
       }
     }
   }
   # no need to revert again.
-  $self->env({})->saved({});
-  return $self;
+  return $self->env({})->saved({});
 }
 
 sub success { scalar(keys %{$_[0]->{env}}) ? 1 : 0; }

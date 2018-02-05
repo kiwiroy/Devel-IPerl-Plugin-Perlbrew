@@ -165,6 +165,12 @@ Devel::IPerl::Plugin::Perlbrew - interact with L<perlbrew> in L<Jupyter|https://
        alt="Build Status" />
 </a>
 
+<!-- Coveralls -->
+<a href='https://coveralls.io/github/kiwiroy/Devel-IPerl-Plugin-Perlbrew?branch=master'>
+  <img src='https://coveralls.io/repos/github/kiwiroy/Devel-IPerl-Plugin-Perlbrew/badge.svg?branch=master'
+       alt='Coverage Status' />
+</a>
+
 <!-- Kritika -->
 <a href="https://kritika.io/users/kiwiroy/repos/6870682787977901/heads/master/">
   <img src="https://kritika.io/users/kiwiroy/repos/6870682787977901/heads/master/status.svg"
@@ -175,12 +181,23 @@ Devel::IPerl::Plugin::Perlbrew - interact with L<perlbrew> in L<Jupyter|https://
 
 =head1 DESCRIPTION
 
-Sometime analysis requires ...
+In a shared server environment the needs of multiple users can be met most
+easily with access to L<perlbrew> and the ability to install perl modules under
+their own libraries. A user can generate a L<cpanfile> to facilitate the creation
+of these libraries in a reproducible manner. At the command line a typical
+workflow in such an environment might appear thus:
 
   perlbrew lib create perl-5.26.0@reproducible
   perlbrew use perl-5.26.0@reproducible
   ## assuming a cpanfile
   cpanm --installdeps .
+
+During the analysis that utilises such codebases using a JupyterHub on the same
+environment a user will wish to access these installed modules in a way that is
+as simple as the command line and within the framework of a Jupyter notebook.
+
+This plugin is designed to easily transition between command line and Jupyter
+with similar syntax and little overhead.
 
 =head1 SYNOPSIS
 

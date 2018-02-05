@@ -12,6 +12,7 @@ test_requires "Test::More" => "0.88";
 on develop => sub {
   requires "Devel::Cover";
   requires "Devel::Cover::Report::Kritika";
+  requires "Devel::Cover::Report::Coveralls";
   requires 'Test::CPAN::Changes';
   requires "Test::Pod::Coverage";
   requires "Test::Pod";

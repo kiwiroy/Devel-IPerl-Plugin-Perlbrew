@@ -14,3 +14,4 @@ install:
 
 after_success:
   - cover -test -report kritika
+  - cover -test -report coveralls

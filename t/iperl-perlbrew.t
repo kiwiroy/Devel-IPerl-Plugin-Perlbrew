@@ -24,10 +24,8 @@ is $iperl->perlbrew('random2'), 1, 'here';
 is $ENV{PERLBREW_ROOT}, $save, 'no change';
 is $ENV{PERLBREW_HOME}, '/tmp', 'set';
 
-TODO: {
-  local $TODO = "check if this is a good test - should prob check \@INC";
-  is $ENV{PERL5LIB}, '/tmp/perl5', 'improve this';
-}
+my @added = grep { m{\Q$App::perlbrew::PERL5LIB\E} } @INC;
+is @added, 1, 'contains path';
 
 my $plugin = new_ok('Devel::IPerl::Plugin::Perlbrew');
 is $plugin->name, undef, 'empty default';
@@ -103,5 +101,22 @@ is $plugin->_make_name('foo'), join('@', $ENV{PERLBREW_PERL}, 'foo'),
 is $iperl->perlbrew_list, 0, 'list';
 
 is $iperl->perlbrew_list_modules, 1, 'list_modules';
+
+#
+# test the unloading feature.
+#
+is $iperl->perlbrew('random1'), 1, 'here';
+my @added = grep { m{\Q$App::perlbrew::PERL5LIB\E} } @INC;
+is @added, 1, 'contains path';
+
+eval "use ACME::NotThere; 1;";
+is $@, '', 'no errors';
+
+is $iperl->perlbrew('random2', 1), 1, 'here';
+
+is $INC{'ACME/NotThere.pm'}, undef, 'not in %INC';
+eval "ACME::NotThere->heres_johnny;";
+like $@, qr/heres_johnny/, 'nope';
+
 
 done_testing;

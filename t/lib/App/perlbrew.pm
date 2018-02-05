@@ -2,6 +2,10 @@ package ## no pause
   App::perlbrew;
 use strict;
 use warnings;
+use File::Spec::Functions 'catdir';
+use FindBin;
+
+our $PERL5LIB = catdir($FindBin::Bin, 'lib', 'perl5');
 
 sub current_perl { return $ENV{PERLBREW_PERL} || 'perl-5.26.0'; }
 
@@ -11,7 +15,7 @@ sub perlbrew_env {
   return (
     PERLBREW_ROOT => $ENV{PERLBREW_ROOT},
     PERLBREW_HOME => '/tmp',
-    PERL5LIB => '/tmp/perl5'
+    PERL5LIB => $PERL5LIB
   );
 }
 sub run_command {

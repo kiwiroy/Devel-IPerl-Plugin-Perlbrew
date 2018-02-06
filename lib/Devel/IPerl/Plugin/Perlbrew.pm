@@ -209,6 +209,12 @@ as simple as the command line and within the framework of a Jupyter notebook.
 This plugin is designed to easily transition between command line and Jupyter
 with similar syntax and little overhead.
 
+=begin html
+
+<p>There are some Jupyter notebooks in the <a href="./examples/">examples directory</a></p>
+
+=end html
+
 =head1 SYNOPSIS
 
   IPerl->load_plugin('Perlbrew') unless IPerl->can('perlbrew');

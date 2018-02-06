@@ -27,6 +27,12 @@ sub run_command {
   $code->(@_) if $code;
 }
 
+sub run_command_lib_create {
+  my ($self, $name) = @_;
+  die "already exists" if $name =~ m/test-library$/;
+  return ;
+}
+
 sub run_command_list {
   return 0;
 }

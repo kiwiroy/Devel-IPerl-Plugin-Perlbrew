@@ -12,7 +12,8 @@ my $iperl = new_ok('IPerl');
 
 ok $iperl->load_plugin('Perlbrew');
 
-can_ok $iperl, qw{perlbrew perlbrew_list perlbrew_list_modules};
+can_ok $iperl,
+  qw{perlbrew perlbrew_lib_create perlbrew_list perlbrew_list_modules};
 
 is $iperl->perlbrew(), -1, 'no library for app::perlbrew';
 
@@ -102,6 +103,11 @@ is $plugin->_make_name($ENV{PERLBREW_PERL}), $ENV{PERLBREW_PERL},
   is $plugin->_make_name('perl-5.26.1@bar'), join('@', $version, 'bar'),
     'make name';
 }
+
+is $iperl->perlbrew_lib_create(), -1, 'no lib in lib_create';
+is $iperl->perlbrew_lib_create('special'), 1, 'lib_create';
+is $iperl->perlbrew_lib_create('test-library'), 0,
+  'lib_create dies in App::perlbrew';
 
 is $iperl->perlbrew_list, 0, 'list';
 

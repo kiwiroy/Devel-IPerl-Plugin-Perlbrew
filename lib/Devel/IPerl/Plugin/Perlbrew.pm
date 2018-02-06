@@ -71,6 +71,18 @@ sub register {
       return $pb->run_command($name);
     });
   }
+
+  for my $name (qw{lib_create}) {
+    $iperl->helper("perlbrew_$name" => sub {
+      my ($ip, $lib, $ret) = (shift, shift, -1);
+      return $ret if not defined $lib;
+      return $ret if 0 == PERLBREW_INSTALLED;
+      my $pb = PERLBREW_CLASS->new();
+      eval { $pb->run_command_lib_create($class->_make_name($lib)); };
+      return $@ ? 0 : 1;
+    });
+  }
+
   return 1;
 }
 
@@ -312,6 +324,18 @@ both, although this is not a recommended use.
   IPerl->perlbrew('perl-5.26.0@reproducible', 0);
   use Bio::Taxonomy;
   ## ... more code, possibly using Jupyter::Tutorial::Simple
+
+=head2 perlbrew_lib_create
+
+  # 1 - success
+  IPerl->perlbrew_lib_create('reproducible');
+  # 0 - already exists
+  IPerl->perlbrew_lib_create('reproducible');
+  # -1 - no library name given
+  IPerl->perlbrew_lib_create();
+
+This is identical to C<<< perlbrew lib create >>>. Returns C<1>, C<0> or C<-1>
+for I<success>, I<already exists> and I<error> respectively.
 
 =head2 perlbrew_list
 

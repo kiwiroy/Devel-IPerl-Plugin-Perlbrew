@@ -134,10 +134,13 @@ sub _from_binary_path {
 }
 
 sub _make_name {
-  my ($class, $lib) = @_;
-  my ($p, $l) = split /\@/, ($lib =~ /\@/ ? $lib : "\@$lib");
-  $p = $ENV{PERLBREW_PERL} || _from_binary_path();
-  return join '@', $p, $l;
+  my ($class, $name, $current) =
+    (shift, shift, $ENV{PERLBREW_PERL} || _from_binary_path());
+  my ($perl, $lib) =
+    split /\@/, ($name =~ m/\@/ || $name eq $current ? $name : "\@$name");
+  $perl = $current;
+  return $perl unless $lib;
+  return join '@', $perl, $lib;
 }
 
 ## from Mojo::Util
@@ -229,6 +232,36 @@ L<App::perlbrew> is a requirement and it is B<suggested> that L<Devel::IPerl> is
 deployed into a L<perlbrew> installed L<perl|perlbrew#COMMAND:-INSTALL> and call
 the L</"perlbrew"> function to use each L<library|perlbrew#COMMAND:-LIB>.
 
+=over 4
+
+=item installing perlbrew
+
+For a single user use case the recommended install proceedure at
+L<https://perlbrew.pl> should be used. If installing for a shared environment
+and JupyterHub, the following may act as a template.
+
+  version=0.82
+  mkdir -p /sw/perlbrew-$version
+  export PERLBREW_ROOT=!$
+  curl -L https://install.perlbrew.pl | bash
+
+=item installing iperl
+
+The kernel specification needs to be installed so that Jupyter can find it. This
+is achieved thus:
+
+  iperl --version
+
+=item perlbrew-ise the kernel
+
+The kernel specification should be updated to make the environment variables,
+that L<App::perlbrew> relies on, available. Included in this dist is the command
+C<perlbrewise-spec>.
+
+  perlbrewise-spec
+
+=back
+
 =head1 IPerl Interface Method
 
 =head2 register
@@ -239,11 +272,20 @@ Called by C<<< IPerl->load_plugin('Perlbrew') >>>.
 
 =head2 perlbrew
 
+  # 1 - success
   IPerl->perlbrew('perl-5.26.0@reproducible');
+  # 0 - it is already loaded
+  IPerl->perlbrew('perl-5.26.0@reproducible');
+  # -1 - no library specified
+  IPerl->perlbrew();
+  # 1 - success switching off reproducible and reverting to perl-5.26.0
+  IPerl->perlbrew($ENV{'PERLBREW_PERL'});
 
 This is identical to C<<< perlbrew use perl-5.26.0@reproducible >>> and will
 switch any from any previous call. Returns C<1>, C<0> or C<-1> for I<success>,
-I<no change> and I<error> respectively.
+I<no change> and I<error> respectively. A name for the library is required. To
+revert to the I<"system"> or non-library version pass the value of
+C<$ENV{PERLBREW_PERL}>.
 
   IPerl->perlbrew('perl-5.26.0@tutorial', 1);
 

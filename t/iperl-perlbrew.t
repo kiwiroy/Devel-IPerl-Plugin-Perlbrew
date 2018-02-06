@@ -81,6 +81,9 @@ $plugin->new(name => 'foo')->new({name => 'bar'})->brew;
 (my $current_perl = $^X) =~ s{.*/perls/([^/]+)/bin/perl}{$1};
 is $plugin->_make_name('foo'), join('@', $ENV{PERLBREW_PERL}, 'foo'),
   'make name';
+is $plugin->_make_name($ENV{PERLBREW_PERL}), $ENV{PERLBREW_PERL},
+  'current perl';
+
 {
   local $ENV{PERLBREW_PERL} = 'perl-5.24.3';
   is $plugin->_make_name('bar'), 'perl-5.24.3@bar', 'make name';
@@ -90,6 +93,8 @@ is $plugin->_make_name('foo'), join('@', $ENV{PERLBREW_PERL}, 'foo'),
   (local $^X = $^X) =~ s{perls/([^/]+)/bin}{perls/perl-alias/bin};
   is $plugin->_make_name('bar'), 'perl-alias@bar', 'make name';
   is $plugin->_make_name('perl-5.26.1@bar'), 'perl-alias@bar', 'make name';
+  is $plugin->_make_name('perl-alias'), 'perl-alias',
+    'non-numeric "current" perl';
   ## default to perl version
   $^X =~ s{perls/([^/]+)/bin}{p/perl-alias/bin};
   (my $version = $^V->normal) =~ s{^v}{perl-};

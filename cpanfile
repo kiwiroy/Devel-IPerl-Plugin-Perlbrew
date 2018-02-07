@@ -4,6 +4,7 @@
 requires "perl" => "5.10.0";
 
 requires 'App::perlbrew';
+requires 'App::cpanminus';
 requires 'Devel::IPerl' => "0.009";
 
 test_requires "Test::More" => "0.88";

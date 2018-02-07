@@ -79,7 +79,9 @@ sub register {
       return $ret if 0 == PERLBREW_INSTALLED;
       my $pb = PERLBREW_CLASS->new();
       $pb->home($domain->($ip));
-      return $pb->run_command($name);
+      local $App::perlbrew::PERLBREW_HOME = $pb->home
+        if ($name eq 'list_modules');
+      return $pb->run_command($name, @_);
     });
   }
 

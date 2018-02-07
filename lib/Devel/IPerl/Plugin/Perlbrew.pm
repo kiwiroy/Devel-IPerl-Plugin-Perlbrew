@@ -43,6 +43,15 @@ sub name { return $_[0]{name} if @_ == 1; $_[0]{name} = $_[1]; $_[0]; }
 sub register {
   my ($class, $iperl) = @_;
 
+  my $domain = sub {
+    my $instance = $_[0]->instance;
+    return $instance->{'perlbrew_domain'} if @_ == 1;
+    $instance->{'perlbrew_domain'} = $_[1];
+    $instance;
+  };
+
+  $domain->($iperl, $ENV{'PERLBREW_HOME'});
+
   for my $name (qw{perlbrew}) {
     my $current = $class->new->name('@@@'); ## impossible name
 
@@ -54,6 +63,7 @@ sub register {
       my $new = $class->new->name($class->_make_name($lib));
       if ($current->unload($unload)->name ne $new->name) {
         my $pb = PERLBREW_CLASS->new();
+        $pb->home($domain->($ip));
         $new->env({ $pb->perlbrew_env($new->name) });
         ## ensure the timing of the DESTROY, spoil
         undef($current = $current->spoil);
@@ -68,6 +78,7 @@ sub register {
       my ($ip, $ret) = (shift, 0);
       return $ret if 0 == PERLBREW_INSTALLED;
       my $pb = PERLBREW_CLASS->new();
+      $pb->home($domain->($ip));
       return $pb->run_command($name);
     });
   }
@@ -78,10 +89,17 @@ sub register {
       return $ret if not defined $lib;
       return $ret if 0 == PERLBREW_INSTALLED;
       my $pb = PERLBREW_CLASS->new();
+      $pb->home($domain->($ip));
       eval { $pb->run_command_lib_create($class->_make_name($lib)); };
       return $@ ? 0 : 1;
     });
   }
+
+  $iperl->helper('perlbrew_domain' => sub {
+    my ($ip, $dir) = (shift, shift);
+    return $domain->($ip) unless $dir && -d $dir;
+    return $domain->($ip, $dir)->{'perlbrew_domain'};
+  });
 
   return 1;
 }
@@ -324,6 +342,23 @@ both, although this is not a recommended use.
   IPerl->perlbrew('perl-5.26.0@reproducible', 0);
   use Bio::Taxonomy;
   ## ... more code, possibly using Jupyter::Tutorial::Simple
+
+=head2 perlbrew_domain
+
+B<This is experimental>.
+
+  # /home/username/.perlbrew
+  IPerl->perlbrew_domain;
+  # /work/username/perlbrew-libs
+  IPerl->perlbrew_domain('/work/username/perlbrew-libs');
+
+Users often generate a large number of libraries which can quickly result in a
+long list generated in the output of L</"perlbrew_list">. This experimental
+feature allows for switching between I<domains> to reduce the size of these
+lists. Thus, a collection of libraries are organised under domains. These are
+only directories, must exist before use and are synonymous with
+C<$ENV{PERLBREW_HOME}>. Indeed, this is a convenient alternative to
+C<$App::perlbrew::PERLBREW_HOME>.
 
 =head2 perlbrew_lib_create
 

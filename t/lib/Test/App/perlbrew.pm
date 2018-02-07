@@ -10,7 +10,7 @@ our $PERL5LIB = catdir($FindBin::Bin, 'lib', 'perl5');
 sub current_perl { return $ENV{PERLBREW_PERL} || 'perl-5.26.0'; }
 
 sub new { bless {}, $_[0]; }
-
+sub home {}
 sub perlbrew_env {
   return (
     PERLBREW_ROOT => $ENV{PERLBREW_ROOT},

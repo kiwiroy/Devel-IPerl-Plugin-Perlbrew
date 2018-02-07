@@ -12,9 +12,10 @@ use lib 't/lib';
 my $iperl = new_ok('IPerl');
 
 ok $iperl->load_plugin('Perlbrew');
+my $domain = $ENV{PERLBREW_HOME} || '';
 
-can_ok $iperl,
-  qw{perlbrew perlbrew_lib_create perlbrew_list perlbrew_list_modules};
+can_ok $iperl, qw{perlbrew perlbrew_domain perlbrew_lib_create perlbrew_list
+                  perlbrew_list_modules};
 
 is $iperl->perlbrew(), -1, 'no library for app::perlbrew';
 
@@ -25,6 +26,9 @@ is $iperl->perlbrew('random2'), 1, 'here';
 
 is $ENV{PERLBREW_ROOT}, $save, 'no change';
 is $ENV{PERLBREW_HOME}, '/tmp', 'set';
+
+is $iperl->perlbrew_domain, $domain, 'domain from register';
+is $iperl->perlbrew_domain('/tmp'), '/tmp', 'domain set';
 
 my @added = grep { m{^\Q$Test::App::perlbrew::PERL5LIB\E$} } @INC;
 is @added, 1, "contains path '$Test::App::perlbrew::PERL5LIB'";

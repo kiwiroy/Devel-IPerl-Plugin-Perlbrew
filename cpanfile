@@ -13,6 +13,7 @@ on develop => sub {
   requires "Devel::Cover";
   requires "Devel::Cover::Report::Kritika";
   requires "Devel::Cover::Report::Coveralls";
+  requires "Devel::Hide";
   requires 'Test::CPAN::Changes';
   requires "Test::Pod::Coverage";
   requires "Test::Pod";

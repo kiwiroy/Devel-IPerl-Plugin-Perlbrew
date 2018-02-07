@@ -26,7 +26,7 @@ sub brew {
   if ($env{PERL5LIB}) {
     say STDERR join " = ", 'PERL5LIB', $env{'PERL5LIB'} if DEBUG;
     eval "use lib split ':', q[$env{PERL5LIB}];";
-    warn $@ if $@;
+    warn $@ if $@; ## uncoverable branch true
   }
   return $self->saved(\%save);
 }
@@ -75,7 +75,7 @@ sub register {
 
   for my $name (qw{list list_modules}) {
     $iperl->helper("perlbrew_$name" => sub {
-      my ($ip, $ret) = (shift, 0);
+      my ($ip, $ret) = (shift, -1);
       return $ret if 0 == PERLBREW_INSTALLED;
       my $pb = PERLBREW_CLASS->new();
       $pb->home($domain->($ip));
@@ -124,7 +124,7 @@ sub spoil {
   if ($env{PERL5LIB}) {
     say STDERR join " = ", 'PERL5LIB', $env{'PERL5LIB'} if DEBUG;
     eval "no lib split ':', q[$env{PERL5LIB}];";
-    warn $@ if $@;
+    warn $@ if $@; ## uncoverable branch true
     if ($self->unload) {
       my $path_re = qr{\Q$env{PERL5LIB}\E};
       for my $module_path(keys %INC) {

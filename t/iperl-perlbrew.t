@@ -23,6 +23,7 @@ my $save = $ENV{PERLBREW_ROOT};
 
 is $iperl->perlbrew('random1'), 1, 'here';
 is $iperl->perlbrew('random2'), 1, 'here';
+is $iperl->perlbrew('random2'), 0, 'here';
 
 is $ENV{PERLBREW_ROOT}, $save, 'no change';
 is $ENV{PERLBREW_HOME}, '/tmp', 'set';

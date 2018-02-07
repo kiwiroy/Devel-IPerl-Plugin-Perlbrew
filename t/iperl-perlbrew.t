@@ -2,6 +2,7 @@ use strict;
 use warnings;
 BEGIN {
   $ENV{IPERL_PLUGIN_PERLBREW_DEBUG} = $ENV{TEST_VERBOSE};
+  $ENV{IPERL_PLUGIN_PERLBREW_CLASS} = 'Test::App::perlbrew';
 }
 use Test::More;
 use Devel::IPerl;
@@ -25,8 +26,8 @@ is $iperl->perlbrew('random2'), 1, 'here';
 is $ENV{PERLBREW_ROOT}, $save, 'no change';
 is $ENV{PERLBREW_HOME}, '/tmp', 'set';
 
-my @added = grep { m{^\Q$App::perlbrew::PERL5LIB\E$} } @INC;
-is @added, 1, "contains path '$App::perlbrew::PERL5LIB'";
+my @added = grep { m{^\Q$Test::App::perlbrew::PERL5LIB\E$} } @INC;
+is @added, 1, "contains path '$Test::App::perlbrew::PERL5LIB'";
 
 my $plugin = new_ok('Devel::IPerl::Plugin::Perlbrew');
 is $plugin->name, undef, 'empty default';
@@ -117,8 +118,8 @@ is $iperl->perlbrew_list_modules, 1, 'list_modules';
 # test the unloading feature.
 #
 is $iperl->perlbrew('random1', 1), 1, 'here';
-@added = grep { m{^\Q$App::perlbrew::PERL5LIB\E$} } @INC;
-is @added, 1, "contains path '$App::perlbrew::PERL5LIB'";
+@added = grep { m{^\Q$Test::App::perlbrew::PERL5LIB\E$} } @INC;
+is @added, 1, "contains path '$Test::App::perlbrew::PERL5LIB'";
 
 eval "use ACME::NotThere; 1;";
 is $@, '', 'no errors';

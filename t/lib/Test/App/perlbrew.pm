@@ -1,5 +1,5 @@
 package ## no pause
-  App::perlbrew;
+  Test::App::perlbrew;
 use strict;
 use warnings;
 use File::Spec::Functions 'catdir';

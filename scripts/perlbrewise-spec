@@ -14,12 +14,19 @@ our $JUPYTER = 'jupyter';
 my @VARIABLES =
   (qw{PERLBREW_HOME PERLBREW_PATH PERLBREW_PERL PERLBREW_ROOT PERLBREW_VERSION});
 
+sub _all_variables_set {
+  my $spec = shift;
+  return '' unless exists $spec->{env};
+  return !!(@VARIABLES == (grep {
+    exists $spec->{env}{$_} && $spec->{env}{$_} eq $ENV{$_}
+  } @VARIABLES));
+}
+
 sub augment_kernel_spec {
   my $class       = shift;
   my $kernel_file = shift;
 	my $kernel_spec = decode_json( $kernel_file->slurp );
-  my $augmented   =
-    (exists $kernel_spec->{env} && $kernel_spec->{env}{PERLBREW_ROOT} ? 0 : 1);
+  my $augmented   = (_all_variables_set($kernel_spec) ? 0 : 1);
   $kernel_spec->{env} = {
     %{$kernel_spec->{env} || {}}
   };

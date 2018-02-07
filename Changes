@@ -1,4 +1,9 @@
 Revision history for perl distribution Devel-IPerl-Plugin-Perlbrew
 
+0.02 Not Released
+ - Added perlbrew* commands as helpers on IPerl
+ - support perlbrew, perlbrew_lib_create, perlbrew_list & perlbrew_list_modules
+ - perlbrewise-spec script for augmenting iperl kernel spec
+
 0.01 2018-01-31T22:40:17+1300
  - Started project

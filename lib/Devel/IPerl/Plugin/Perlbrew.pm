@@ -12,7 +12,7 @@ use constant PERLBREW_CLASS => $ENV{IPERL_PLUGIN_PERLBREW_CLASS}
 
 use constant PERLBREW_INSTALLED => eval 'use '. PERLBREW_CLASS.'; 1' ? 1 : 0;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 sub brew {
   my $self = shift;

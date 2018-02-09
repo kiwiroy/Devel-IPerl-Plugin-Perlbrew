@@ -1,18 +1,29 @@
+#!/usr/bin/env perl
 # -*- mode: perl; -*-
+
+## __FATPACK__
+
 package Devel::IPerl::Plugin::Perlbrew::Install;
 
 use strict;
 use warnings;
-use feature 'say';
-
+use Applify;
 use JSON::MaybeXS qw(decode_json encode_json);
 use Path::Class qw{dir};
 
-our $IPERL = 'iperl';
-our $JUPYTER = 'jupyter';
+version our $VERSION = '0.02';
+
+documentation $0;
 
 my @VARIABLES =
   (qw{PERLBREW_HOME PERLBREW_PATH PERLBREW_PERL PERLBREW_ROOT PERLBREW_VERSION});
+
+option str  => iperl     => 'path to iperl command        [default=iperl]',
+  default => 'iperl';
+option str  => jupyter   => 'path to jupyter command      [default=jupyter]',
+  default => 'jupyter';
+option flag => omit_home => 'Do not include PERLBREW_HOME [default=0]',
+  default => 0;
 
 sub _all_variables_set {
   my $spec = shift;
@@ -40,8 +51,9 @@ sub augment_kernel_spec {
 }
 
 sub get_ipython_target_dir {
+  my $self = shift;
   my $ipython_dir;
-  open my $fh, '-|', "$JUPYTER --data-dir" or return;
+  open my $fh, '-|', "@$self{jupyter} --data-dir" or return;
   while (my $line = <$fh>) {
     chomp($line);
     $ipython_dir ||= $line;
@@ -51,15 +63,27 @@ sub get_ipython_target_dir {
 }
 
 sub get_kernels_target_dir {
-	my $ipython_dir = get_ipython_target_dir();
+  my $self = shift;
+	my $ipython_dir = $self->get_ipython_target_dir();
 	return unless length $ipython_dir;
 	dir($ipython_dir)->subdir(qw[ kernels iperl ]);
 }
 
-sub main {
-  my ($class) = @_;
+sub report_iperl_version {
+  my $class = shift;
+  open my $fh, '-|', "@$class{iperl} --version 2>&1" or return;
+  while (<$fh>) {
+    chomp;
+    say STDERR $_;
+  }
+}
+
+app {
+  my ($class) = (shift);
 
   $class->report_iperl_version;
+
+  @VARIABLES = grep { $_ ne 'PERLBREW_HOME' } @VARIABLES if $class->omit_home;
 
   my $target = $class->get_kernels_target_dir;
   my $kernel_file = dir($target)->file('kernel.json');
@@ -73,17 +97,18 @@ sub main {
   }
 
   return 0;
-}
+};
 
-sub report_iperl_version {
-  my $class = shift;
-  open my $fh, '-|', "$IPERL --version 2>&1" or return;
-  while (<$fh>) {
-    chomp;
-    say STDERR $_;
-  }
-}
+=pod
 
-exit(__PACKAGE__->main()) unless (caller());
+=head1 NAME
 
-1;
+perlbrewise-spec
+
+=head1 DESCRIPTION
+
+=head1 SYNOPSIS
+
+  perlbrewise-spec [options]
+
+=cut

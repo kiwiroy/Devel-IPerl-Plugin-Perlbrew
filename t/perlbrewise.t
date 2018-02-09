@@ -1,28 +1,35 @@
 use strict;
 use warnings;
 use Test::More;
+use Test::Applify;
 use File::Temp qw{tempdir};
 use Path::Class qw{dir};
 use JSON::MaybeXS qw(decode_json);
 
 my $tmp =
   tempdir('devel-iperl-plugin-perlbrew-XXXXX', TMPDIR => 1, CLEANUP => 1 );
-
+my ($t, $app);
+my ($r, $out, $err, $e);
 ## installer script
-require './scripts/perlbrewise-spec';
-{
-  no warnings 'once';
-  ## setting this subverts the writing to kernel.json in install location
-  $Devel::IPerl::Plugin::Perlbrew::Install::JUPYTER =
-    join ' ', $^X, './t/jupyter', $tmp;
-}
+$t = new_ok('Test::Applify', ['./scripts/perlbrewise-spec']);
+$t->help_ok->is_option('omit-home')->is_option('jupyter')->is_option('iperl');
+$t->can_ok(qw{_all_variables_set});
 
-my $class = 'Devel::IPerl::Plugin::Perlbrew::Install';
+$app = $t->app_instance('--jupyter', join ' ', $^X, './t/jupyter', $tmp);
+is $app->jupyter, join(' ', $^X, './t/jupyter', $tmp), 'jupyter set';
 
-is $class->main(), 1, 'file does not exist';
+($r, $out, $err, $e) = $t->run_instance_ok($app);
+is $r, 1, 'file does not exist';
 
-can_ok $class, qw{_all_variables_set};
-if (my $all_vars = $class->can('_all_variables_set')) {
+is $out, '', 'no messages on stdout';
+
+like $err, qr{Devel::IPerl}, 'messages ok';
+like $err, qr{Devel/IPerl}, 'messages ok';
+like $err, qr{does not exist}, 'messages ok';
+like $err, qr{requires an existing kernel\.json}, 'messages ok';
+
+## test _all_variables_set as it is core to workings
+if (my $all_vars = $app->can('_all_variables_set')) {
   local %ENV = %ENV;
   @ENV{qw{PERLBREW_HOME PERLBREW_PATH PERLBREW_PERL PERLBREW_ROOT PERLBREW_VERSION}} =
     qw{/home/user /sw/perlbrew/bin perl-5.26.0 /sw/perlbrew 0.78};
@@ -49,11 +56,10 @@ if (my $all_vars = $class->can('_all_variables_set')) {
   is $all_vars->($spec), '', 'version mismatch';
 }
 
-my $target = $class->get_kernels_target_dir;
+my $target = $app->get_kernels_target_dir;
 $target->mkpath;
 my $kernel_file = dir($target)->file('kernel.json');
-
-diag $kernel_file;
+diag $kernel_file if $ENV{TEST_VERBOSE};
 
 $kernel_file->spew(<<'EOF');
 {
@@ -61,7 +67,10 @@ $kernel_file->spew(<<'EOF');
 }
 EOF
 
-is $class->main(), 0, 'now that file does exist';
+($r, $out, $err, $e) = $t->run_instance_ok($app);
+is $r, 0, 'now that file does exist';
+like $err, qr{Devel::IPerl}, 'messages ok';
+like $err, qr{Devel/IPerl},  'messages ok';
 
 is_deeply decode_json($kernel_file->slurp()), {
   argv => ["test"],

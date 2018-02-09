@@ -68,3 +68,5 @@
 ^local/
 ^MANIFEST\.SKIP
 ^README\.pod
+
+^perlbrewise-spec$

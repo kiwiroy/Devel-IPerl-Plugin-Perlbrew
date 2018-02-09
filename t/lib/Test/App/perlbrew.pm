@@ -1,3 +1,4 @@
+## no critic(NamingConventions::Capitalization)
 package ## no pause
   Test::App::perlbrew;
 use strict;

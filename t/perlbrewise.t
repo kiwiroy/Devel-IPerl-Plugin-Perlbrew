@@ -23,10 +23,13 @@ is $r, 1, 'file does not exist';
 
 is $out, '', 'no messages on stdout';
 
-like $err, qr{Devel::IPerl}, 'messages ok';
-like $err, qr{Devel/IPerl}, 'messages ok';
-like $err, qr{does not exist}, 'messages ok';
-like $err, qr{requires an existing kernel\.json}, 'messages ok';
+SKIP: {
+  skip "CI has no jupyter.", 4 if $ENV{CI};
+  like $err, qr{Devel::IPerl}, 'messages ok';
+  like $err, qr{Devel/IPerl}, 'messages ok';
+  like $err, qr{does not exist}, 'messages ok';
+  like $err, qr{requires an existing kernel\.json}, 'messages ok';
+}
 
 ## test _all_variables_set as it is core to workings
 if (my $all_vars = $app->can('_all_variables_set')) {
@@ -69,8 +72,12 @@ EOF
 
 ($r, $out, $err, $e) = $t->run_instance_ok($app);
 is $r, 0, 'now that file does exist';
-like $err, qr{Devel::IPerl}, 'messages ok';
-like $err, qr{Devel/IPerl},  'messages ok';
+
+SKIP: {
+  skip "CI has no jupyter.", 2 if $ENV{CI};
+  like $err, qr{Devel::IPerl}, 'messages ok';
+  like $err, qr{Devel/IPerl},  'messages ok';
+};
 
 is_deeply decode_json($kernel_file->slurp()), {
   argv => ["test"],

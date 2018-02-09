@@ -1,5 +1,8 @@
 Revision history for perl distribution Devel-IPerl-Plugin-Perlbrew
 
+0.03 Not Released
+ - Applify, FatPack and install perlbrewise-spec
+
 0.02 2018-02-08T13:21:07+1300
  - Added perlbrew* commands as helpers on IPerl
  - support perlbrew, perlbrew_lib_create, perlbrew_list & perlbrew_list_modules

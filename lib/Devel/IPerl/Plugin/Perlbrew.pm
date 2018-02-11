@@ -170,9 +170,16 @@ sub _make_name {
     (shift, shift, $ENV{PERLBREW_PERL} || _from_binary_path());
   my ($perl, $lib) =
     split /\@/, ($name =~ m/\@/ || $name eq $current ? $name : "\@$name");
-  $perl = $current;
+  $perl = $class->_resolve_compat($perl) || $current;
   return $perl unless $lib;
   return join '@', $perl, $lib;
+}
+
+sub _resolve_compat {
+  my ($class, $perl) = (shift, shift);
+  my $pb = PERLBREW_CLASS->new;
+  my ($current) = grep { $_->{is_current} } $pb->installed_perls;
+  return $pb->resolve_installation_name($current->{version}) || '';
 }
 
 ## from Mojo::Util

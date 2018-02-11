@@ -9,6 +9,11 @@ use Devel::IPerl;
 use IPerl;
 use lib 't/lib';
 
+sub test_perlbrew_perl {
+  (my $perl = $^V->normal) =~ s{^v}{perl-};
+  return $perl;
+}
+
 my $iperl = new_ok('IPerl');
 
 ok $iperl->load_plugin('Perlbrew');
@@ -85,11 +90,14 @@ $plugin = new_ok('Devel::IPerl::Plugin::Perlbrew', [name => 'foobar']);
 $plugin->new(name => 'foo')->new({name => 'bar'})->brew;
 
 # _make_name tests check various constraints
-(my $current_perl = $^X) =~ s{.*/perls/([^/]+)/bin/perl}{$1};
-is $plugin->_make_name('foo'), join('@', $ENV{PERLBREW_PERL}, 'foo'),
-  'make name';
-is $plugin->_make_name($ENV{PERLBREW_PERL}), $ENV{PERLBREW_PERL},
-  'current perl';
+{
+  local $ENV{PERLBREW_PERL} = $ENV{PERLBREW_PERL} || test_perlbrew_perl();
+  (my $current_perl = $^X) =~ s{.*/perls/([^/]+)/bin/perl}{$1};
+  is $plugin->_make_name('foo'), join('@', $ENV{PERLBREW_PERL}, 'foo'),
+    'make name';
+  is $plugin->_make_name($ENV{PERLBREW_PERL}), $ENV{PERLBREW_PERL},
+    'current perl';
+}
 
 {
   local $ENV{PERLBREW_PERL} = 'perl-5.24.3';
@@ -104,7 +112,7 @@ is $plugin->_make_name($ENV{PERLBREW_PERL}), $ENV{PERLBREW_PERL},
     'non-numeric "current" perl';
   ## default to perl version
   $^X =~ s{perls/([^/]+)/bin}{p/perl-alias/bin};
-  (my $version = $^V->normal) =~ s{^v}{perl-};
+  my $version = test_perlbrew_perl();
   is $plugin->_make_name('bar'), join('@', $version, 'bar'), 'make name';
   is $plugin->_make_name('perl-5.26.1@bar'), join('@', $version, 'bar'),
     'make name';

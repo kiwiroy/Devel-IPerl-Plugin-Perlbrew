@@ -154,6 +154,13 @@ sub success { scalar(keys %{$_[0]->{env}}) ? 1 : 0; }
 
 sub unload { return $_[0]{unload} if @_ == 1; $_[0]{unload} = $_[1]; $_[0]; }
 
+sub _check_env_perl {
+  my ($env_perl, $path_perl) = (shift, _from_binary_path());
+  $ENV{PERLBREW_PERL} = $env_perl = $path_perl unless $env_perl;
+  return $env_perl unless $path_perl;
+  return ($env_perl eq $path_perl ? $env_perl : $ENV{PERLBREW_PERL} = $path_perl);
+}
+
 sub _filtered_env_keys {
   return (sort grep { m/^PERL/i && $_ ne "PERL5LIB" } keys %{+pop});
 }
@@ -167,19 +174,41 @@ sub _from_binary_path {
 
 sub _make_name {
   my ($class, $name, $current) =
-    (shift, shift, $ENV{PERLBREW_PERL} || _from_binary_path());
-  my ($perl, $lib) =
-    split /\@/, ($name =~ m/\@/ || $name eq $current ? $name : "\@$name");
-  $perl = $class->_resolve_compat($perl) || $current;
+    (shift, shift, _check_env_perl($ENV{PERLBREW_PERL}));
+  my $pb = PERLBREW_CLASS->new();
+  my ($perl, $lib) = $pb->resolve_installation_name($name);
+  if ((! defined($perl))){
+    if ($name =~ m/\@[^\@]+$/) {
+      ($perl, $lib) = $pb->resolve_installation_name(join '@', $current, (split /\@/, $name)[1]);
+    } elsif($name !~ /\@/ && $name !~ /^[\d\.]+$/){
+      ($perl, $lib) = $pb->resolve_installation_name(join '@', $current, $name);
+    }
+  }
+  $perl = $class->_resolve_compat($pb, $perl, $current, $lib) || $current;
   return $perl unless $lib;
   return join '@', $perl, $lib;
 }
 
 sub _resolve_compat {
-  my ($class, $perl) = (shift, shift);
-  my $pb = PERLBREW_CLASS->new;
-  my ($current) = grep { $_->{is_current} } $pb->installed_perls;
-  return $pb->resolve_installation_name($current->{version}) || '';
+  my ($class, $pb, $perl, $current, $lib) = @_;
+  return '' unless $lib;
+  my @installed = $pb->installed_perls;
+  # get the current perl and version
+  my ($current_perl)  = grep { $_->{name} eq $current } @installed;
+  my $current_version = $current_perl->{comparable_version};
+
+  my ($avail) = (
+    # filter the exact
+    grep { $_->{perl_name} eq $perl && $_->{lib_name} eq $lib }
+    # get the libraries only
+    map  { @{$_->{libs}} }
+    # filter the compatible libraries
+    grep { $_->{comparable_version} == $current_version } @installed
+    );
+  #use Data::Dumper;
+  #say STDERR Dumper $current_perl, $current_version, \@installed if DEBUG;
+  return '' unless $avail;
+  return $avail->{perl_name};
 }
 
 ## from Mojo::Util

@@ -77,7 +77,7 @@ SKIP: {
   skip "CI has no jupyter.", 2 if $ENV{CI};
   like $err, qr{Devel::IPerl}, 'messages ok';
   like $err, qr{Devel/IPerl},  'messages ok';
-};
+}
 
 is_deeply decode_json($kernel_file->slurp()), {
   argv => ["test"],

@@ -27,10 +27,10 @@ sub installed_perls {
   (my $version = $^V->normal) =~ s{^v}{perl-};
   my %perlset = (
     $version      => [$self->comparable_perl_version($version)],
-    'perl-5.26.0' => [5260000, qw{foo bar random random1 random2}],
-    'perl-5.24.3' => [5240300, qw{bar}],
-    'perl-alias'  => [5260000, qw{example}],
-    'perl-5.8.9'  => [5080900, qw{archived}],
+    'perl-5.26.0' => [5_260_000, qw{foo bar random random1 random2}],
+    'perl-5.24.3' => [5_240_300, qw{bar}],
+    'perl-alias'  => [5_260_000, qw{example}],
+    'perl-5.8.9'  => [5_080_900, qw{archived}],
   );
   for my $perl(keys %perlset){
     my $inst = {
@@ -61,9 +61,9 @@ sub perlbrew_env {
 
 sub resolve_installation_name {
   my ($self, $name) = @_;
-  my ($perl, $lib)  = split '@', $name, 2;
+  my ($perl, $lib)  = split /\@/, $name, 2;
   my @installed     = $self->installed_perls;
-  if (0 == grep { $_->{name} eq $perl} @installed) {
+  if (0 == grep { $_->{name} eq $perl } @installed) {
     if (grep { $_->{name} eq "perl-$perl" } @installed) {
       $perl = "perl-$perl";
     } else {

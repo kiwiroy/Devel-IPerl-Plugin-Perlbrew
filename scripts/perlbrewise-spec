@@ -103,12 +103,44 @@ app {
 
 =head1 NAME
 
-perlbrewise-spec
+perlbrewise-spec - augment the iperl kernel spec
 
 =head1 DESCRIPTION
+
+A script to augment the L<iperl|Devel::IPerl> installed kernel spec to set the
+environment variables required by L<perlbrew> and thus the
+L<Devel::IPerl::Plugin::Perlbrew>.
 
 =head1 SYNOPSIS
 
   perlbrewise-spec [options]
+
+=head1 OPTION DETAILS
+
+=over 4
+
+=item -iperl
+
+Set this if C<iperl> command is not in the path.
+
+=item -jupyter
+
+Set this if C<jupyter> command is not in the path.
+
+=item -omit-home
+
+If the kernel spec is deployed system wide in a jupyterhub, setting
+C<PERLBREW_HOME> system wide is not desireable. The soluton to this is to use
+the B<-omit-home> flag to not write the value of C<PERLBREW_HOME> to the kernel
+spec and instead set the value in I<jupyter_notebook_config.py> to be variable
+depending on the C<USER> environment variable.
+
+  # somewhere in jupyter_notebook_config.py
+  # Add default perlbrew home for users
+  os.environ['PERLBREW_HOME'] = ''.join(['/shared/',
+                                         os.environ['USER'],
+                                         '/.perlbrew'])
+
+=back
 
 =cut

@@ -834,7 +834,7 @@ $fatpacked{"Devel/IPerl/Plugin/Perlbrew.pm"} = '#line '.(1+__LINE__).' "'.__FILE
   
   use constant PERLBREW_INSTALLED => eval 'use '. PERLBREW_CLASS.'; 1' ? 1 : 0;
   
-  our $VERSION = '0.02';
+  our $VERSION = '0.03';
   
   sub brew {
     my $self = shift;
@@ -976,6 +976,13 @@ $fatpacked{"Devel/IPerl/Plugin/Perlbrew.pm"} = '#line '.(1+__LINE__).' "'.__FILE
   
   sub unload { return $_[0]{unload} if @_ == 1; $_[0]{unload} = $_[1]; $_[0]; }
   
+  sub _check_env_perl {
+    my ($env_perl, $path_perl) = (shift, _from_binary_path());
+    $ENV{PERLBREW_PERL} = $env_perl = $path_perl unless $env_perl;
+    return $env_perl unless $path_perl;
+    return ($env_perl eq $path_perl ? $env_perl : $ENV{PERLBREW_PERL} = $path_perl);
+  }
+  
   sub _filtered_env_keys {
     return (sort grep { m/^PERL/i && $_ ne "PERL5LIB" } keys %{+pop});
   }
@@ -989,12 +996,41 @@ $fatpacked{"Devel/IPerl/Plugin/Perlbrew.pm"} = '#line '.(1+__LINE__).' "'.__FILE
   
   sub _make_name {
     my ($class, $name, $current) =
-      (shift, shift, $ENV{PERLBREW_PERL} || _from_binary_path());
-    my ($perl, $lib) =
-      split /\@/, ($name =~ m/\@/ || $name eq $current ? $name : "\@$name");
-    $perl = $current;
+      (shift, shift, _check_env_perl($ENV{PERLBREW_PERL}));
+    my $pb = PERLBREW_CLASS->new();
+    my ($perl, $lib) = $pb->resolve_installation_name($name);
+    if ((! defined($perl))){
+      if ($name =~ m/\@[^\@]+$/) {
+        ($perl, $lib) = $pb->resolve_installation_name(join '@', $current, (split /\@/, $name)[1]);
+      } elsif($name !~ /\@/ && $name !~ /^[\d\.]+$/){
+        ($perl, $lib) = $pb->resolve_installation_name(join '@', $current, $name);
+      }
+    }
+    $perl = $class->_resolve_compat($pb, $perl, $current, $lib) || $current;
     return $perl unless $lib;
     return join '@', $perl, $lib;
+  }
+  
+  sub _resolve_compat {
+    my ($class, $pb, $perl, $current, $lib) = @_;
+    return '' unless $lib;
+    my @installed = $pb->installed_perls;
+    # get the current perl and version
+    my ($current_perl)  = grep { $_->{name} eq $current } @installed;
+    my $current_version = $current_perl->{comparable_version};
+  
+    my ($avail) = (
+      # filter the exact
+      grep { $_->{perl_name} eq $perl && $_->{lib_name} eq $lib }
+      # get the libraries only
+      map  { @{$_->{libs}} }
+      # filter the compatible libraries
+      grep { $_->{comparable_version} == $current_version } @installed
+      );
+    #use Data::Dumper;
+    #say STDERR Dumper $current_perl, $current_version, \@installed if DEBUG;
+    return '' unless $avail;
+    return $avail->{perl_name};
   }
   
   ## from Mojo::Util
@@ -3336,6 +3372,21 @@ $fatpacked{"Path/Class/File.pm"} = '#line '.(1+__LINE__).' "'.__FILE__."\"\n".<<
   
   =cut
 PATH_CLASS_FILE
+
+$fatpacked{"Reply/Plugin/Perlbrew.pm"} = '#line '.(1+__LINE__).' "'.__FILE__."\"\n".<<'REPLY_PLUGIN_PERLBREW';
+  package Reply::Devel::Perlbrew;
+  
+  use strict;
+  use warnings;
+  
+  use base 'Reply::Plugin';
+  
+  sub command_perlbrew {
+  
+  }
+  
+  1;
+REPLY_PLUGIN_PERLBREW
 
 $fatpacked{"darwin-2level/Cpanel/JSON/XS.pm"} = '#line '.(1+__LINE__).' "'.__FILE__."\"\n".<<'DARWIN-2LEVEL_CPANEL_JSON_XS';
   package Cpanel::JSON::XS;
@@ -5766,12 +5817,44 @@ app {
 
 =head1 NAME
 
-perlbrewise-spec
+perlbrewise-spec - augment the iperl kernel spec
 
 =head1 DESCRIPTION
+
+A script to augment the L<iperl|Devel::IPerl> installed kernel spec to set the
+environment variables required by L<perlbrew> and thus the
+L<Devel::IPerl::Plugin::Perlbrew>.
 
 =head1 SYNOPSIS
 
   perlbrewise-spec [options]
+
+=head1 OPTION DETAILS
+
+=over 4
+
+=item -iperl
+
+Set this if C<iperl> command is not in the path.
+
+=item -jupyter
+
+Set this if C<jupyter> command is not in the path.
+
+=item -omit-home
+
+If the kernel spec is deployed system wide in a jupyterhub, setting
+C<PERLBREW_HOME> system wide is not desireable. The soluton to this is to use
+the B<-omit-home> flag to not write the value of C<PERLBREW_HOME> to the kernel
+spec and instead set the value in I<jupyter_notebook_config.py> to be variable
+depending on the C<USER> environment variable.
+
+  # somewhere in jupyter_notebook_config.py
+  # Add default perlbrew home for users
+  os.environ['PERLBREW_HOME'] = ''.join(['/shared/',
+                                         os.environ['USER'],
+                                         '/.perlbrew'])
+
+=back
 
 =cut

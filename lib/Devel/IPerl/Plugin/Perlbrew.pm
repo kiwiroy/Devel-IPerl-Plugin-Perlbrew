@@ -196,7 +196,7 @@ sub _resolve_compat {
   my @installed = $pb->installed_perls;
   # get the current perl and version
   my ($current_perl)  = grep { $_->{name} eq $current } @installed;
-  my $current_version = $current_perl->{comparable_version};
+  my $current_version = $current_perl->{comparable_version} || '';
 
   my ($avail) = (
     # filter the exact

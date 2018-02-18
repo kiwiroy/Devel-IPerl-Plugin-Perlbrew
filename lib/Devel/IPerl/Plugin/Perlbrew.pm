@@ -60,7 +60,7 @@ sub register {
       return $ret if not defined $lib;
       return $ret if 0 == PERLBREW_INSTALLED;
 
-      my $new = $class->new->name($class->_make_name($lib));
+      my $new = $class->new->name($class->_make_name($lib, $domain->($ip)));
       if ($current->unload($unload)->name ne $new->name) {
         my $pb = PERLBREW_CLASS->new();
         $pb->home($domain->($ip));
@@ -92,7 +92,7 @@ sub register {
       return $ret if 0 == PERLBREW_INSTALLED;
       my $pb = PERLBREW_CLASS->new();
       $pb->home($domain->($ip));
-      eval { $pb->run_command_lib_create($class->_make_name($lib)); };
+      eval { $pb->run_command_lib_create($class->_make_name($lib, $domain->($ip))); };
       return $@ ? 0 : 1;
     });
   }
@@ -173,10 +173,10 @@ sub _from_binary_path {
 }
 
 sub _make_name {
-  my ($class, $name, $current) =
-    (shift, shift, _check_env_perl($ENV{PERLBREW_PERL}));
+  my ($class, $name, $current, $home) =
+    (shift, shift, _check_env_perl($ENV{PERLBREW_PERL}), shift);
   my $pb = PERLBREW_CLASS->new();
-  $pb->home(IPerl->instance->{perlbrew_domain});
+  $pb->home($home) if $home;
   my ($perl, $lib) = $pb->resolve_installation_name($name);
   if ((! defined($perl))){
     if ($name =~ m/\@[^\@]+$/) {

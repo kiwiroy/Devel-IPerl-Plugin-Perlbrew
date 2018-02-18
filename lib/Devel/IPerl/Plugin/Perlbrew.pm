@@ -176,6 +176,7 @@ sub _make_name {
   my ($class, $name, $current) =
     (shift, shift, _check_env_perl($ENV{PERLBREW_PERL}));
   my $pb = PERLBREW_CLASS->new();
+  $pb->home(IPerl->instance->{perlbrew_domain});
   my ($perl, $lib) = $pb->resolve_installation_name($name);
   if ((! defined($perl))){
     if ($name =~ m/\@[^\@]+$/) {

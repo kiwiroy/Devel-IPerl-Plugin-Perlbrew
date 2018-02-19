@@ -12,7 +12,7 @@ use constant PERLBREW_CLASS => $ENV{IPERL_PLUGIN_PERLBREW_CLASS}
 
 use constant PERLBREW_INSTALLED => eval 'use '. PERLBREW_CLASS.'; 1' ? 1 : 0;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 sub brew {
   my $self = shift;
@@ -238,7 +238,7 @@ Devel::IPerl::Plugin::Perlbrew - interact with L<perlbrew> in L<Jupyter|https://
 
 =begin html
 
-<!--- Travis --->
+<!-- Travis -->
 <a href="https://travis-ci.org/kiwiroy/Devel-IPerl-Plugin-Perlbrew">
   <img src="https://travis-ci.org/kiwiroy/Devel-IPerl-Plugin-Perlbrew.svg?branch=master"
        alt="Build Status" />
@@ -254,6 +254,12 @@ Devel::IPerl::Plugin::Perlbrew - interact with L<perlbrew> in L<Jupyter|https://
 <a href="https://kritika.io/users/kiwiroy/repos/6870682787977901/heads/master/">
   <img src="https://kritika.io/users/kiwiroy/repos/6870682787977901/heads/master/status.svg"
        alt="Kritika Analysis Status"/>
+</a>
+
+<!-- CPAN -->
+<a href="https://badge.fury.io/pl/Devel-IPerl-Plugin-Perlbrew">
+  <img src="https://badge.fury.io/pl/Devel-IPerl-Plugin-Perlbrew.svg"
+       alt="CPAN version" />
 </a>
 
 =end html
